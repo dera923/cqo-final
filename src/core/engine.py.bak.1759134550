@@ -1,0 +1,304 @@
+#!/usr/bin/env python3
+"""
+CQO統合エンジン - Module AとA-Gateの連携実行
+
+NASA標準:
+- コマンドライン実行可能
+- 完全なログ記録
+- エラーハンドリング
+
+Usage:
+    python -m src.core.engine --data-path data/sample.csv --output results/
+"""
+
+import sys
+import json
+import yaml
+from pathlib import Path
+from typing import Optional, Dict, Any
+import numpy as np
+import pandas as pd
+import typer
+from rich.console import Console
+from rich.table import Table
+from rich import print as rprint
+from loguru import logger
+
+# 相対インポート対策
+sys.path.append(str(Path(__file__).parent.parent.parent))
+
+from src.modules.module_a import DoublyRobustEstimator, EstimationResult
+from src.gate.agate import AGate, GateStatus
+
+app = typer.Typer(help="CQO Engine - Causal Quantum Optimizer")
+console = Console()
+
+
+class CQOEngine:
+    """統合実行エンジン"""
+    
+    def __init__(self, config_path: Optional[str] = None):
+        """
+        Args:
+            config_path: 設定ファイルパス（YAML）
+        """
+        # 設定読み込み
+        if config_path and Path(config_path).exists():
+            with open(config_path, 'r') as f:
+                self.config = yaml.safe_load(f)
+        else:
+            # デフォルト設定
+            self.config = {
+                'module_a': {
+                    'n_splits': 5,
+                    'enable_orthogonal': True
+                },
+                'gate': {
+                    'strict_mode': True,
+                    'enable_omega': False
+                }
+            }
+        
+        # モジュール初期化
+        self.estimator = DoublyRobustEstimator(
+            n_splits=self.config['module_a']['n_splits'],
+            enable_orthogonal=self.config['module_a']['enable_orthogonal']
+        )
+        
+        self.gate = AGate(
+            thresholds=self.config.get('gate', {}).get('thresholds'),
+            strict_mode=self.config['gate']['strict_mode'],
+            enable_omega=self.config['gate']['enable_omega']
+        )
+        
+        logger.info("CQO Engine initialized")
+    
+    def run(self, X: np.ndarray, T: np.ndarray, Y: np.ndarray,
+            verbose: bool = True) -> Dict[str, Any]:
+        """
+        因果推論の実行とGate評価
+        
+        Returns:
+            結果辞書（ATE、信頼区間、Gate判定、モード）
+        """
+        # Step 1: DR推定
+        if verbose:
+            console.print("[bold cyan]Step 1: Running Doubly Robust Estimation...[/bold cyan]")
+        
+        estimation_result = self.estimator.fit(X, T, Y)
+        
+        # Step 2: Gate評価
+        if verbose:
+            console.print("[bold cyan]Step 2: Evaluating with A-Gate...[/bold cyan]")
+        
+        gate_result = self.gate.evaluate(estimation_result)
+        
+        # Step 3: 結果整形
+        output = {
+            'ate': estimation_result.ate,
+            'ci_lower': estimation_result.ate_ci_lower,
+            'ci_upper': estimation_result.ate_ci_upper,
+            'mode': gate_result.mode,
+            'gate_status': gate_result.status.value,
+            'violations': [v.value for v in gate_result.violations],
+            'recommendations': gate_result.recommendations,
+            'diagnostics': estimation_result.diagnostics,
+            'signature': gate_result.signature
+        }
+        
+        # Step 4: 結果表示
+        if verbose:
+            self._display_results(output, gate_result)
+        
+        return output
+    
+    def _display_results(self, output: Dict, gate_result):
+        """結果の視覚的表示"""
+        # ATE結果テーブル
+        table = Table(title="Estimation Results", show_header=True)
+        table.add_column("Metric", style="cyan")
+        table.add_column("Value", style="magenta")
+        
+        table.add_row("ATE", f"{output['ate']:.4f}")
+        table.add_row("95% CI", f"[{output['ci_lower']:.4f}, {output['ci_upper']:.4f}]")
+        table.add_row("Mode", output['mode'])
+        table.add_row("Gate Status", output['gate_status'])
+        
+        console.print(table)
+        
+        # Gate評価詳細
+        if gate_result.violations:
+            console.print("\n[bold red]⚠ Violations:[/bold red]")
+            for violation in output['violations']:
+                console.print(f"  • {violation}")
+        
+        if output['recommendations']:
+            console.print("\n[bold yellow]💡 Recommendations:[/bold yellow]")
+            for rec in output['recommendations']:
+                console.print(f"  • {rec}")
+        
+        # チェックポイント詳細
+        console.print("\n[bold]Gate Checkpoints:[/bold]")
+        for checkpoint in gate_result.checkpoints:
+            symbol = "✅" if checkpoint.passed else "❌"
+            console.print(f"  {symbol} {checkpoint}")
+
+
+@app.command()
+def estimate(
+    data_path: str = typer.Option(..., help="Path to data CSV"),
+    treatment_col: str = typer.Option("treatment", help="Treatment column name"),
+    outcome_col: str = typer.Option("outcome", help="Outcome column name"),
+    config: Optional[str] = typer.Option(None, help="Config YAML path"),
+    output: Optional[str] = typer.Option(None, help="Output JSON path"),
+    verbose: bool = typer.Option(True, help="Verbose output")
+):
+    """
+    データファイルから因果効果を推定
+    
+    Example:
+        python -m src.core.engine estimate --data-path data/sample.csv
+    """
+    try:
+        # データ読み込み
+        console.print(f"[bold]Loading data from {data_path}...[/bold]")
+        df = pd.read_csv(data_path)
+        
+        # 特徴量、処置、アウトカムの分離
+        feature_cols = [col for col in df.columns 
+                       if col not in [treatment_col, outcome_col]]
+        
+        X = df[feature_cols].values
+        T = df[treatment_col].values
+        Y = df[outcome_col].values
+        
+        console.print(f"Data shape: {X.shape[0]} samples, {X.shape[1]} features")
+        
+        # エンジン実行
+        engine = CQOEngine(config)
+        result = engine.run(X, T, Y, verbose=verbose)
+        
+        # 結果保存
+        if output:
+            with open(output, 'w') as f:
+                json.dump(result, f, indent=2)
+            console.print(f"\n[green]Results saved to {output}[/green]")
+        
+        return result
+        
+    except Exception as e:
+        logger.error(f"Estimation failed: {str(e)}")
+        console.print(f"[red]Error: {str(e)}[/red]")
+        raise typer.Exit(1)
+
+
+@app.command()
+def simulate(
+    n_samples: int = typer.Option(1000, help="Number of samples"),
+    n_features: int = typer.Option(10, help="Number of features"),
+    treatment_effect: float = typer.Option(1.0, help="True treatment effect"),
+    output: Optional[str] = typer.Option(None, help="Output path for simulated data"),
+    run_estimation: bool = typer.Option(True, help="Run estimation on simulated data")
+):
+    """
+    シミュレーションデータの生成と推定
+    
+    Example:
+        python -m src.core.engine simulate --n-samples 5000 --treatment-effect 2.0
+    """
+    console.print("[bold]Generating simulation data...[/bold]")
+    
+    # データ生成
+    np.random.seed(42)
+    X = np.random.randn(n_samples, n_features)
+    
+    # 傾向スコア（非線形）
+    logit_ps = X[:, 0] + 0.5 * X[:, 1]**2 - X[:, 2]
+    ps = 1 / (1 + np.exp(-logit_ps))
+    T = np.random.binomial(1, ps)
+    
+    # アウトカム（処置効果あり）
+    Y0 = X[:, 0] + X[:, 1] + np.random.randn(n_samples) * 0.5
+    Y1 = Y0 + treatment_effect + 0.2 * X[:, 2]  # ヘテロ効果
+    Y = T * Y1 + (1 - T) * Y0
+    
+    console.print(f"True ATE: {treatment_effect}")
+    console.print(f"Treatment rate: {np.mean(T):.2%}")
+    
+    # データ保存
+    if output:
+        df = pd.DataFrame(X, columns=[f'X{i}' for i in range(n_features)])
+        df['treatment'] = T
+        df['outcome'] = Y
+        df.to_csv(output, index=False)
+        console.print(f"[green]Simulated data saved to {output}[/green]")
+    
+    # 推定実行
+    if run_estimation:
+        console.print("\n[bold]Running estimation on simulated data...[/bold]")
+        engine = CQOEngine()
+        result = engine.run(X, T, Y)
+        
+        # バイアス計算
+        bias = result['ate'] - treatment_effect
+        console.print(f"\n[bold]Bias: {bias:.4f}[/bold]")
+        
+        # 被覆確認
+        covered = result['ci_lower'] <= treatment_effect <= result['ci_upper']
+        console.print(f"True effect covered: {'✅ Yes' if covered else '❌ No'}")
+
+
+@app.command()
+def validate(
+    config: str = typer.Option(..., help="Config YAML path"),
+    dry_run: bool = typer.Option(False, help="Validate config without execution")
+):
+    """
+    設定ファイルの検証
+    
+    Example:
+        python -m src.core.engine validate --config configs/base.yaml
+    """
+    try:
+        with open(config, 'r') as f:
+            config_data = yaml.safe_load(f)
+        
+        # 必須フィールドチェック
+        required = ['module_a', 'gate', 'logging']
+        missing = [field for field in required if field not in config_data]
+        
+        if missing:
+            console.print(f"[red]Missing required fields: {missing}[/red]")
+            raise typer.Exit(1)
+        
+        console.print("[green]✅ Configuration valid[/green]")
+        
+        if not dry_run:
+            # テスト実行
+            console.print("\n[bold]Running test with config...[/bold]")
+            X = np.random.randn(100, 5)
+            T = np.random.binomial(1, 0.5, 100)
+            Y = np.random.randn(100)
+            
+            engine = CQOEngine(config)
+            result = engine.run(X, T, Y, verbose=False)
+            console.print("[green]✅ Test execution successful[/green]")
+            
+    except Exception as e:
+        console.print(f"[red]Validation failed: {str(e)}[/red]")
+        raise typer.Exit(1)
+
+
+if __name__ == "__main__":
+    # ログ設定
+    logger.add(
+        "logs/cqo_{time}.log",
+        rotation="100 MB",
+        retention="30 days",
+        level="DEBUG"
+    )
+    
+    app()
+
+
+
