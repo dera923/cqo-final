@@ -1,0 +1,2 @@
+[console_scripts]
+cqo-viz = cqo_viz.cli:cli

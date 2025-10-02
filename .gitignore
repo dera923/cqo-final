@@ -1,22 +1,18 @@
 # Python
 __pycache__/
-*.py[cod]
+*.pyc
 .venv/
-*.egg-info/
+.ipynb_checkpoints/
 
-# Data
-data/raw/*
-data/processed/*
-!data/raw/.gitkeep
-!data/processed/.gitkeep
+# 再生成アーティファクト
+reports/tables/*.csv
+reports/figures/*
+reports/logs/*
 
-# Logs
-logs/*.log
-*.log
+# データ（生/中間/加工は追跡しない）
+data/**/*.csv
+!data/README.md
 
-# IDE
-.vscode/
-.idea/
-
-# OS
+# OS/editor
 .DS_Store
+*.swp
