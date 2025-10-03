@@ -42,4 +42,20 @@ jobs:
           cp -v reports/compare/${COMPARE_BASE}/baseline/adoption_decision.csv reports/tables/adoption_decision.csv
 
       - name: Tests
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: pip-${{ runner.os }}-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            pip-${{ runner.os }}-
+
         run: pytest -q
+
+      - name: Upload reports artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports-${{ github.run_id }}
+          path: reports/**
