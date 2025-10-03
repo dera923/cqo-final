@@ -1,155 +1,78 @@
 project: cqo-final
 gate:
   csv: data/data_estimates_gate.csv
-  features: [X0, X1]
+  features:
+  - X0
+  - X1
   alpha: 0.05
   w95_max: 10.0
   w99_max: 10.0
-  smd_max: 0.10
-
+  smd_max: 0.1
 horizon_days: 90
 policy:
-  adoption_rule: "LCB95 > 0"
+  adoption_rule: LCB95 > 0
 gates:
+  mode: order_stat
   alpha_tail: 0.05
   w95_max: 10.0
   w99_max: 10.0
-  smd_max: 0.10
-  smd_features: ["X0","X1","X2"]
+  smd_max: 0.1
+  smd_features:
+  - x0
+  - x1
 runtime:
-  out_figures: "reports/figures/"
-  out_tables:  "reports/tables/"
-
+  out_figures: reports/figures/
+  out_tables: reports/tables/
 data_contract:
-  csv_path: "data/data_estimates.csv"
+  csv_path: data/data_estimates.csv
   columns:
-    y: "y"
-    t: "t"
-    e: "e"
-    mu0: "mu0"
-    mu1: "mu1"
-  weight:
-    # weight列の優先探索順。最初に見つかった列を採用
-    candidates: ["weight","w","ipw","sample_weight","sw"]
-    # 見つからなければ自動生成する（安定化IPW）
-    auto_if_missing: true
-    clip: [1.0e-6, 1-1.0e-6]   # eのクリップ範囲
-gates:
-  alpha_tail: 0.05
-  w95_max: 10.0
-  w99_max: 10.0
-  smd_max: 0.10
-runtime:
-  out_figures: "reports/figures/"
-  out_tables:  "reports/tables/"
-
-data_contract:
-  csv_path: "data/data_estimates.csv"
-  columns:
-    # 候補から最初に見つかった列を採用
-    y:   { candidates: ["y","profit","outcome","revenue","target"] }
-    e:   { candidates: ["e","ps","propensity","pscore","p_hat"] }
-    t:   { candidates: ["t","T","treat","treatment","assigned"] }
-    mu0: { candidates: ["mu0","m0","y0_hat","mu_0","hat_y0","pred0","predict0"] }
-    mu1: { candidates: ["mu1","m1","y1_hat","mu_1","hat_y1","pred1","predict1"] }
-  weight:
-    candidates: ["weight","w","ipw","sample_weight","sw"]
-    auto_if_missing: true
-    clip: [1.0e-6, 1-1.0e-6]
-
-t_fallback:
-  allow_if_missing: true
-  strategy: "bernoulli_from_e"   # t ~ Bernoulli(e)（再現性のため固定seed）
-  seed: 20251002
-
-mu_fallback:
-  allow_if_missing: true
-  strategy: "global_mean"
-
-gates:
-  alpha_tail: 0.05
-  w95_max: 10.0
-  w99_max: 10.0
-  smd_max: 0.10
-  mode: "order_stat"
-  smd_features: ["x0","x1"]
-runtime:
-  out_figures: "reports/figures/"
-  out_tables:  "reports/tables/"
-
-gates:
-  alpha_tail: 0.05
-  mode: "order_stat"      # 左右合計 floor(n*alpha) 個を端と定義（有限標本でα超えを防止）
-
-# （本番移行時に推奨）フォールバックを止める
+    y:
+      candidates:
+      - y
+      - profit
+      - outcome
+      - target
+      - revenue
+    t:
+      candidates:
+      - t
+      - T
+      - treat
+      - treatment
+      - assigned
+      - action
+    e:
+      candidates:
+      - e
+      - ps
+      - propensity
+      - pscore
+      - p_hat
+    mu0:
+      candidates:
+      - mu0
+      - m0
+      - y0_hat
+      - mu_0
+      - hat_y0
+      - pred0
+      - predict0
+      - out0
+    mu1:
+      candidates:
+      - mu1
+      - m1
+      - y1_hat
+      - mu_1
+      - hat_y1
+      - pred1
+      - predict1
+      - out1
 t_fallback:
   allow_if_missing: false
+  strategy: bernoulli_from_e
 mu_fallback:
   allow_if_missing: false
-
-
-# --- override: mu_fallback (dev only; last-wins) ---
-mu_fallback:
-  allow_if_missing: true
-  strategy: "global_mean"
-
-# --- prod override: fail-closed (no fallbacks) ---
-t_fallback:
-  allow_if_missing: false
-  strategy: "bernoulli_from_e"
-mu_fallback:
-  allow_if_missing: false
-  strategy: "global_mean"
-
-# 列名の候補を拡充（上流の命名ぶれ吸収）
-data_contract:
-  columns:
-    t:   { candidates: ["t","T","treat","treatment","assigned","action"] }
-    mu0: { candidates: ["mu0","m0","y0_hat","mu_0","hat_y0","pred0","predict0","out0"] }
-    mu1: { candidates: ["mu1","m1","y1_hat","mu_1","hat_y1","pred1","predict1","out1"] }
-
-
-# --- override: data_contract path (last-wins) ---
-data_contract:
-  csv_path: "data/data_estimates.csv"
-
-# --- override: data_contract (last-wins) ---
-data_contract:
-  csv_path: "data/data_estimates.csv"
-  columns:
-    y:   { candidates: ["y","profit","outcome","target","revenue"] }
-    t:   { candidates: ["t","T","treat","treatment","assigned","action"] }
-    e:   { candidates: ["e","ps","propensity","pscore","p_hat"] }
-    mu0: { candidates: ["mu0","m0","y0_hat","mu_0","hat_y0","pred0","predict0","out0"] }
-    mu1: { candidates: ["mu1","m1","y1_hat","mu_1","hat_y1","pred1","predict1","out1"] }
-
-# --- override: data_contract (last-wins, prod) ---
-data_contract:
-  csv_path: "data/data_estimates.csv"
-  columns:
-    y:   { candidates: ["y","profit","outcome","target","revenue"] }
-    t:   { candidates: ["t","T","treat","treatment","assigned","action"] }
-    e:   { candidates: ["e","ps","propensity","pscore","p_hat"] }
-    mu0: { candidates: ["mu0","m0","y0_hat","mu_0","hat_y0","pred0","predict0","out0"] }
-    mu1: { candidates: ["mu1","m1","y1_hat","mu_1","hat_y1","pred1","predict1","out1"] }
-
-# --- prod override: fail-closed ---
-t_fallback:
-  allow_if_missing: false
-  strategy: "bernoulli_from_e"
-mu_fallback:
-  allow_if_missing: false
-  strategy: "global_mean"
-
-
-# --- override: gates (last-wins) ---
-gates:
-  mode: "order_stat"
-  alpha_tail: 0.05
-  w95_max: 10.0
-  w99_max: 10.0
-  smd_max: 0.10
-  smd_features: ["x0","x1"]
-
+  strategy: global_mean
 compare:
-  out_dir: "reports/compare/"
+  out_dir: reports/compare/
