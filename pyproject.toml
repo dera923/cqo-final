@@ -1,0 +1,36 @@
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+
+[tool.isort]
+profile = "black"
+line_length = 100
+force_single_line = false
+combine_as_imports = true
+known_first_party = ["src", "tools", "tests"]
+skip = ["external", "src/modules", "src/gate"]
+
+[tool.ruff]
+line-length = 100
+select = ["E","F","I","UP"]
+ignore = ["E501"]
+exclude = ["external", "src/modules", "src/gate"]
+
+[tool.mypy]
+python_version = "3.11"
+ignore_missing_imports = true
+warn_unused_ignores = true
+no_implicit_optional = false
+disallow_untyped_defs = false
+check_untyped_defs = false
+# 当面は型整備されていない領域を除外して、CLIとtoolsに集中
+files = [
+  "src/cli",
+  "tools",
+  "tests",
+]
+exclude = '(external/|^src/modules/|^src/gate/)'
+
+[[tool.mypy.overrides]]
+module = "tools.sanity.tune_eps"
+ignore_errors = true

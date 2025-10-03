@@ -1,61 +1,88 @@
-import pandas as pd, yaml, datetime as dt
-from pathlib import Path
+from __future__ import annotations
 
-SPEC = Path("docs/requirements/core_spec.yml")
-OUT_MD = Path("reports/REPORT.md")
+import hashlib
+import pathlib as P
 
-def read_last_csv(path):
-    p = Path(path)
-    if not p.exists(): return None
-    df = pd.read_csv(p)
-    return (df.tail(1), df)
+import pandas as pd
+import yaml
 
-def md_table(df: pd.DataFrame, max_rows=20):
-    df2 = df.copy()
-    if len(df2) > max_rows: df2 = df2.tail(max_rows)
-    return df2.to_markdown(index=False)
 
-def main():
-    now = dt.datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
-    spec = yaml.safe_load(SPEC.read_text(encoding="utf-8"))
-    figs = Path(spec["runtime"]["out_figures"])
-    tabs = Path(spec["runtime"]["out_tables"])
+# --------- helper ----------
+def card(title: str, html: str) -> str:
+    return f"<section><h3>{title}</h3>{html}</section>"
 
-    sm_last, _  = read_last_csv(tabs/"summary_metrics.csv")
-    est_last, _ = read_last_csv(tabs/"estimates.csv")
-    kpi_last, _ = read_last_csv(tabs/"policy_kpi.csv")
-    adopt_last, _ = read_last_csv(tabs/"adoption_decision.csv")
 
-    md = []
-    md += [f"# CQO × Long-Term Profit — Final Report",
-           f"_Generated: {now}_", ""]
+def table_from_csv(path: P.Path, n: int = 20) -> str:
+    if not path.exists():
+        return "<p>NA</p>"
+    df = pd.read_csv(path)
+    if df.empty:
+        return "<p>NA</p>"
+    return df.head(n).to_html(index=False)
 
-    md += ["## 1. Overview (SSOT)",
-           f"- Spec: `{SPEC}`",
-           f"- Horizon: {spec.get('horizon_days','NA')} days, Discount: {spec.get('discount','NA')}",
-           f"- Adoption rule: **{spec['policy']['adoption_rule']}**", ""]
 
-    md += ["## 2. Gate-IN",
-           f"![gate_report]({figs/'gate_report.png'})" if (figs/'gate_report.png').exists() else "_(gate_report.png not found)_",
-           "### Summary Metrics (last row)"]
-    md += [md_table(sm_last) if sm_last is not None else "_summary_metrics.csv not found_", ""]
+# --------- compare (safe minimal) ----------
+def latest_compare() -> str:
+    """
+    最新タグの reports/compare/<TAG>/summary.csv があれば簡易表を返す。
+    無ければ <p>NA</p> にフォールバック（安全実装）。
+    """
+    try:
+        sp = yaml.safe_load(open("docs/requirements/core_spec.yml"))
+        out_dir = P.Path((sp.get("compare") or {}).get("out_dir") or "reports/compare/")
+        tags = [p for p in out_dir.iterdir() if p.is_dir()]
+        if not tags:
+            return "<p>NA</p>"
+        new = sorted(tags, key=lambda x: x.name)[-1] / "summary.csv"
+        if not new.exists():
+            return "<p>NA</p>"
+        df = pd.read_csv(new)
+        if df.empty:
+            return "<p>NA</p>"
+        row = df.iloc[0].to_dict()
+        rows = "".join(f"<tr><td>{k}</td><td>{v}</td></tr>" for k, v in row.items())
+        return f"<table>{rows}</table>"
+    except Exception:
+        return "<p>NA</p>"
 
-    md += ["## 3. Estimation (DR/EIF)"]
-    md += [md_table(est_last) if est_last is not None else "_estimates.csv not found_", ""]
 
-    md += ["## 4. Post-selection Adjustment (Gate-OUT)"]
-    md += [md_table(kpi_last) if kpi_last is not None else "_policy_kpi.csv not found_", ""]
+# --------- main ----------
+def main() -> None:
+    r = P.Path("reports")
+    r.mkdir(exist_ok=True)
+    tbl = r / "tables"
 
-    md += ["## 5. Adoption Decision"]
-    md += [md_table(adopt_last) if adopt_last is not None else "_adoption_decision.csv not found_", ""]
+    # 主要カード
+    summary = table_from_csv(tbl / "summary_metrics.csv")
+    smd = table_from_csv(tbl / "smd_metrics.csv")
+    est = table_from_csv(tbl / "estimates.csv")
+    adopt = table_from_csv(tbl / "adoption_decision.csv")
 
-    md += ["## 6. Artifacts Index",
-           f"- Figures dir: `{figs}`",
-           f"- Tables dir: `{tabs}`", ""]
+    comp = latest_compare()
 
-    OUT_MD.parent.mkdir(parents=True, exist_ok=True)
-    OUT_MD.write_text("\n".join(md), encoding="utf-8")
-    print(f"✓ Wrote {OUT_MD}")
+    # ページ構成（シンプル）
+    body = []
+    body.append(card("A. Summary", summary))
+    body.append(card("B. SMD", smd))
+    body.append(card("C. Estimates", est))
+    body.append(card("D. Adoption", adopt))
+    body.append(card("F. Comparison (latest)", comp))
+
+    summary_fingerprint = hashlib.sha256(("".join(body)).encode()).hexdigest()[:16]
+    html = f"""<!doctype html>
+<html><head><meta charset="utf-8"><title>CQO Report</title>
+<style>body{{font-family:system-ui, sans-serif;}} section{{margin:16px 0}} table{{border-collapse:collapse}} td,th{{border:1px solid #ccc;padding:4px 8px}}</style>
+</head><body>
+<h2>CQO – Report</h2>
+<p>Generated at: {{}}</p>
+<pre>{summary_fingerprint}</pre>
+{''.join(body)}
+<footer><p>Generated at: build_report.py</p></footer>
+</body></html>"""
+
+    (r / "index.html").write_text(html, encoding="utf-8")
+    print("wrote reports/index.html")
+
 
 if __name__ == "__main__":
     main()

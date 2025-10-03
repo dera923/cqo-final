@@ -11,8 +11,10 @@ from rich.console import Console
 app = typer.Typer(help="CQO 統合コマンド: データのシミュレーションと検証")
 console = Console(width=100)
 
+
 def _ensure_parent(path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
+
 
 @app.command(help="シミュレーションデータを生成してCSVに保存します")
 def simulate(
@@ -48,6 +50,7 @@ def simulate(
     df.to_csv(output, index=False)
     console.print(f"[bold green]Saved:[/bold green] {output}  (rows={len(df)})")
 
+
 @app.command(help="CSV を読み込み、基本統計を表示します")
 def validate(
     input: Path = typer.Option(Path("data/simulated.csv"), "--input", "-i", help="入力CSV"),
@@ -58,8 +61,10 @@ def validate(
     console.print(f"[bold]Rows[/bold]: {len(df)}, [bold]Cols[/bold]: {len(df.columns)}")
     console.print(df.head())
 
+
 def main() -> None:
     app()
+
 
 if __name__ == "__main__":
     main()

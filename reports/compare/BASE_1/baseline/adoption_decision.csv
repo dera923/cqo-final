@@ -1,0 +1,2 @@
+policy,tau_hat,se,lcb95_raw,lcb95_adj,adopt
+base,0.02,0.01,0.0004,0.0004,True

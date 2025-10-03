@@ -1,5 +1,7 @@
-import pandas as pd
 from pathlib import Path
+
+import pandas as pd
+
 
 def decide(kpi_csv: str, out_csv: str):
     df = pd.read_csv(kpi_csv)

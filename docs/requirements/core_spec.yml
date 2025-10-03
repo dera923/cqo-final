@@ -141,3 +141,15 @@ mu_fallback:
   allow_if_missing: false
   strategy: "global_mean"
 
+
+# --- override: gates (last-wins) ---
+gates:
+  mode: "order_stat"
+  alpha_tail: 0.05
+  w95_max: 10.0
+  w99_max: 10.0
+  smd_max: 0.10
+  smd_features: ["x0","x1"]
+
+compare:
+  out_dir: "reports/compare/"

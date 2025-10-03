@@ -1,0 +1,31 @@
+<!doctype html><html><head>
+<meta charset="utf-8"><title>CQO Run Report</title>
+<style>
+body{font-family:system-ui,-apple-system,Segoe UI,Roboto;line-height:1.5;margin:24px}
+h1{font-size:1.6rem;margin:0 0 12px}
+h2{font-size:1.2rem;border-bottom:1px solid #ddd;padding-bottom:4px}
+table{border-collapse:collapse;margin:8px 0;max-width:100%}
+th,td{border:1px solid #ddd;padding:4px 8px;text-align:left;font-size:.9rem}
+.badge{display:inline-block;background:#eef;border:1px solid #dde;padding:2px 8px;border-radius:999px;margin-right:6px}
+footer{margin-top:24px;color:#666;font-size:.85rem}
+</style></head><body>
+<h1>CQO – Run Report</h1>
+<div><span class="badge">n=5000</span> <span class="badge">tail=0.05</span> <span class="badge">w95=0.973</span> <span class="badge">w99=1.01</span> <span class="badge">tau_hat=0.411013</span> <span class="badge">se=0.0314051</span> <span class="badge">LCB95=0.0004</span> <span class="badge">adopt=True</span></div>
+
+<section><h2>A. Gate (J-curve / weights)</h2><img src="reports/figures/j_curve.png" alt="j_curve.png" /><table><tr><th>n</th><th>alpha</th><th>mode</th><th>eps</th><th>tail</th><th>tail_count</th><th>tail_left</th><th>tail_right</th><th>w95</th><th>w99</th></tr><tr><td>5000</td><td>0.05</td><td>order_stat</td><td>0.1371526613471734</td><td>0.05</td><td>250</td><td>125</td><td>125</td><td>0.9729219807860268</td><td>1.0052835105141085</td></tr></table></section>
+<section><h2>A. SMD (balance)</h2><table><tr><th>feature</th><th>n1</th><th>n0</th><th>smd</th><th>m1</th><th>m0</th></tr></table><p>0 rows</p></section>
+<section><h2>B. DR/EIF estimates</h2><table><tr><th>tau_hat</th><th>se</th><th>ci_lo</th><th>ci_hi</th></tr><tr><td>0.411013231659823</td><td>0.0314051158198238</td><td>0.3494592046529682</td><td>0.4725672586666777</td></tr></table></section>
+<section><h2>C. KPI (LCB95)</h2><table><tr><th>policy</th><th>tau_hat</th><th>se</th><th>lcb95_raw</th><th>lcb95_adj</th></tr><tr><td>base</td><td>0.02</td><td>0.01</td><td>0.0004</td><td>0.0004</td></tr></table></section>
+<section><h2>D. Adoption</h2><table><tr><th>policy</th><th>tau_hat</th><th>se</th><th>lcb95_raw</th><th>lcb95_adj</th><th>adopt</th></tr><tr><td>base</td><td>0.02</td><td>0.01</td><td>0.0004</td><td>0.0004</td><td>True</td></tr></table></section>
+<section><h2>E. Monitoring</h2><pre>tail_guard=True, w95_guard=True, w99_guard=True, smd_guard=True
+</pre><table><tr><th>date</th><th>n</th><th>tail</th><th>w95</th><th>w99</th><th>max_smd</th><th>tau_hat</th><th>se</th><th>lcb95</th><th>adopt</th></tr><tr><td>2025-10-03</td><td>5000</td><td>0.05</td><td>0.9729219807860268</td><td>1.0052835105141085</td><td>nan</td><td>0.411013231659823</td><td>0.0314051158198238</td><td>0.0004</td><td>1.0</td></tr></table></section>
+
+<footer>
+<p>Generated at: {}</p>
+<pre>fb6e1db669330282</pre>
+<section><h2>F. Comparison (latest)</h2><p>NA</p></section>
+<footer>
+<p>Generated at: build_report</p>
+
+</footer>
+</body></html>
