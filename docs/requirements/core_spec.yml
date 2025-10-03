@@ -76,3 +76,17 @@ mu_fallback:
   strategy: global_mean
 compare:
   out_dir: reports/compare/
+objective:
+  primary: GP28
+  decision_rule: LCB95>0
+pipeline:
+  enforce_steps:
+  - 3
+  - 4
+  - 5
+  - 6
+  - 7
+  - 8
+  - 9
+  - 10
+  - 11

@@ -1,6 +1,5 @@
 import argparse
 import pathlib as P
-import sys
 
 import numpy as np
 import pandas as pd
@@ -23,11 +22,7 @@ def main():
     base_dir = out_dir / args.base / "baseline"
     new_dir = out_dir / args.base / "new"
     tbl_dir = P.Path("reports/tables")
-
-n_sd = rd(tbl_dir / "smd_metrics.csv")
-    if not base_dir.exists():
-        print(f"ERROR: baseline not found: {base_dir}", file=sys.stderr)
-        sys.exit(2)
+    n_sd = rd(tbl_dir / "smd_metrics.csv")
     new_dir.mkdir(parents=True, exist_ok=True)
 
     # 読み込み
