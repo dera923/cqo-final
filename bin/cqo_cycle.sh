@@ -32,5 +32,9 @@ else
 fi
 
 # --- tests ---
+
+# --- adoption (CPI) ---
+python tools/policy/cpi_select.py
+
 pytest -q || { echo "[pytest] failed"; exit 1; }
 echo "done."
