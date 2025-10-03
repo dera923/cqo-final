@@ -1,0 +1,146 @@
+<h2>BASE_1 – Baseline vs New</h2><p>Generated: 2025-10-03T16:02:36.651278</p><section><h3>Baseline</h3><h4>summary_metrics.csv</h4><table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>n</th>
+      <th>alpha</th>
+      <th>mode</th>
+      <th>eps</th>
+      <th>tail</th>
+      <th>tail_count</th>
+      <th>tail_left</th>
+      <th>tail_right</th>
+      <th>w95</th>
+      <th>w99</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>5000</td>
+      <td>0.05</td>
+      <td>order_stat</td>
+      <td>0.137153</td>
+      <td>0.05</td>
+      <td>250</td>
+      <td>125</td>
+      <td>125</td>
+      <td>0.972922</td>
+      <td>1.005284</td>
+    </tr>
+  </tbody>
+</table><h4>smd_metrics.csv</h4><table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>feature</th>
+      <th>n1</th>
+      <th>n0</th>
+      <th>smd</th>
+      <th>m1</th>
+      <th>m0</th>
+    </tr>
+  </thead>
+  <tbody>
+  </tbody>
+</table><h4>estimates.csv</h4><table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>tau_hat</th>
+      <th>se</th>
+      <th>ci_lo</th>
+      <th>ci_hi</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>0.411013</td>
+      <td>0.031405</td>
+      <td>0.349459</td>
+      <td>0.472567</td>
+    </tr>
+  </tbody>
+</table><h4>policy_kpi.csv</h4><table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>policy</th>
+      <th>tau_hat</th>
+      <th>se</th>
+      <th>lcb95_raw</th>
+      <th>lcb95_adj</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>base</td>
+      <td>0.02</td>
+      <td>0.01</td>
+      <td>0.0004</td>
+      <td>0.0004</td>
+    </tr>
+  </tbody>
+</table><h4>adoption_decision.csv</h4><table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>policy</th>
+      <th>tau_hat</th>
+      <th>se</th>
+      <th>lcb95_raw</th>
+      <th>lcb95_adj</th>
+      <th>adopt</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>base</td>
+      <td>0.02</td>
+      <td>0.01</td>
+      <td>0.0004</td>
+      <td>0.0004</td>
+      <td>True</td>
+    </tr>
+  </tbody>
+</table></section><section><h3>New</h3><h4>summary.csv</h4><table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>base_tag</th>
+      <th>d_tau</th>
+      <th>d_se</th>
+      <th>d_lcb95</th>
+      <th>d_tail</th>
+      <th>d_w95</th>
+      <th>d_w99</th>
+      <th>adopt_base</th>
+      <th>adopt_new</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>BASE_1</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>True</td>
+      <td>True</td>
+    </tr>
+  </tbody>
+</table><h4>guards.csv</h4><table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>tail_guard</th>
+      <th>w95_guard</th>
+      <th>w99_guard</th>
+      <th>smd_guard</th>
+      <th>lcb95_non_regression</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>True</td>
+      <td>True</td>
+      <td>True</td>
+      <td>True</td>
+      <td>True</td>
+    </tr>
+  </tbody>
+</table></section>

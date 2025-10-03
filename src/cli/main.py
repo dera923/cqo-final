@@ -4,7 +4,6 @@ import argparse
 import os
 import subprocess
 from collections.abc import Sequence
-from typing import Optional
 
 STEPS: dict[str, list[str]] = {
     "gate": ["python", "tools/sanity/gate_sanity.py"],
