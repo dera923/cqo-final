@@ -31,10 +31,10 @@ else
   echo "[wolfram] not installed; skip"
 fi
 
-# --- tests ---
-
 # --- adoption (CPI) ---
-python tools/policy/cpi_select.py
+python tools/policy/cpi_select.py || { echo "[adopt] failed"; exit 1; }
 
+# --- tests ---
 pytest -q || { echo "[pytest] failed"; exit 1; }
+
 echo "done."
