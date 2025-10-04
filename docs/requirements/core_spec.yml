@@ -8,6 +8,11 @@ gate:
   w95_max: 10.0
   w99_max: 10.0
   smd_max: 0.1
+  mode: order_stat
+  alpha_tail: 0.05
+  smd_features:
+  - x0
+  - x1
 horizon_days: 90
 policy:
   adoption_rule: LCB95 > 0
