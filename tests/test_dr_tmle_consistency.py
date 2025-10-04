@@ -27,7 +27,9 @@ def test_dr_tmle_close():
     df = pd.read_csv(p)
     if not {"tau_dr", "se_dr", "tau_tml", "se_tml"}.issubset(df.columns):
         need = {"tau_hat", "se", "ci_lo", "ci_hi"}
-        assert need.issubset(df.columns), f"missing cols for CI check: {need - set(df.columns)}"
+        assert need.issubset(
+            df.columns
+        ), f"missing cols for CI check: {need - set(df.columns)}"
         tau = float(df["tau_hat"].iloc[0])
         se = float(df["se"].iloc[0])
         lo = float(df["ci_lo"].iloc[0])
@@ -72,4 +74,6 @@ def test_order_stat_tail_count():
         pytest.skip("estimates.csv missing for n")
     n = len(pd.read_csv(q))
     expected = int(np.floor(n * ALPHA))
-    assert abs(tail_count - expected) <= 1, f"tail_count={tail_count}, expected≈{expected}"
+    assert (
+        abs(tail_count - expected) <= 1
+    ), f"tail_count={tail_count}, expected≈{expected}"

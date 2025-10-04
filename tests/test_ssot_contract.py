@@ -2,9 +2,13 @@ import yaml
 
 
 def test_enforce_steps_fixed():
-    spec = yaml.safe_load(open("docs/requirements/core_spec.yml", encoding="utf-8")) or {}
+    spec = (
+        yaml.safe_load(open("docs/requirements/core_spec.yml", encoding="utf-8")) or {}
+    )
     assert "pipeline" in spec, "SSOT違反: 'pipeline' が core_spec.yml にありません"
-    assert "enforce_steps" in spec["pipeline"], "SSOT違反: pipeline.enforce_steps がありません"
+    assert (
+        "enforce_steps" in spec["pipeline"]
+    ), "SSOT違反: pipeline.enforce_steps がありません"
     assert spec["pipeline"]["enforce_steps"] == [
         3,
         4,

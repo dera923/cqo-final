@@ -25,10 +25,28 @@ def _default_columns():
         "t": {"candidates": ["t", "T", "treat", "treatment", "assigned", "action"]},
         "e": {"candidates": ["e", "ps", "propensity", "pscore", "p_hat"]},
         "mu0": {
-            "candidates": ["mu0", "m0", "y0_hat", "mu_0", "hat_y0", "pred0", "predict0", "out0"]
+            "candidates": [
+                "mu0",
+                "m0",
+                "y0_hat",
+                "mu_0",
+                "hat_y0",
+                "pred0",
+                "predict0",
+                "out0",
+            ]
         },
         "mu1": {
-            "candidates": ["mu1", "m1", "y1_hat", "mu_1", "hat_y1", "pred1", "predict1", "out1"]
+            "candidates": [
+                "mu1",
+                "m1",
+                "y1_hat",
+                "mu_1",
+                "hat_y1",
+                "pred1",
+                "predict1",
+                "out1",
+            ]
         },
     }
 

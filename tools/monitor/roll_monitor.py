@@ -30,7 +30,8 @@ row = {
     "w99": float(sm["w99"]),
     "max_smd": (
         pd.read_csv(T / "smd_metrics.csv")["smd"].max()
-        if (T / "smd_metrics.csv").exists() and "smd" in pd.read_csv(T / "smd_metrics.csv").columns
+        if (T / "smd_metrics.csv").exists()
+        and "smd" in pd.read_csv(T / "smd_metrics.csv").columns
         else np.nan
     ),
     "tau_hat": float(pd.read_csv(T / "estimates.csv").iloc[0]["tau_hat"]),
@@ -44,7 +45,11 @@ row = {
 }
 
 M = T / "monitor_time.csv"
-hist = pd.read_csv(M, parse_dates=["date"]) if M.exists() else pd.DataFrame(columns=row.keys())
+hist = (
+    pd.read_csv(M, parse_dates=["date"])
+    if M.exists()
+    else pd.DataFrame(columns=row.keys())
+)
 hist = (
     pd.concat([hist, pd.DataFrame([row])], ignore_index=True)
     .drop_duplicates(subset=["date"], keep="last")
@@ -72,10 +77,14 @@ w95_max = float((sp["gates"] or {}).get("w95_max", np.inf))
 w99_max = float((sp["gates"] or {}).get("w99_max", np.inf))
 smd_max = float((sp["gates"] or {}).get("smd_max", np.inf))
 
-tail_guard = hist["tail"].iloc[-1] <= alpha + 1.0 / max(int(hist["n"].iloc[-1]), 1) + 1e-12
+tail_guard = (
+    hist["tail"].iloc[-1] <= alpha + 1.0 / max(int(hist["n"].iloc[-1]), 1) + 1e-12
+)
 w95_guard = hist["w95"].iloc[-1] <= w95_max + 1e-12
 w99_guard = hist["w99"].iloc[-1] <= w99_max + 1e-12
-smd_guard = np.isnan(hist["max_smd"].iloc[-1]) or hist["max_smd"].iloc[-1] <= smd_max + 1e-12
+smd_guard = (
+    np.isnan(hist["max_smd"].iloc[-1]) or hist["max_smd"].iloc[-1] <= smd_max + 1e-12
+)
 
 with open(F / "monitor_card.txt", "w") as f:
     f.write(

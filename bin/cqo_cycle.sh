@@ -34,6 +34,9 @@ fi
 # --- adoption (CPI) ---
 python tools/policy/cpi_select.py || { echo "[adopt] failed"; exit 1; }
 
+python tools/sanity/ensure_estimates_lcb95.py || true
+# --- observability tables (summary_metrics) ---
+python tools/observability/build_summary_metrics.py --base "${BASE}" || true
 # --- tests ---
 pytest -q || { echo "[pytest] failed"; exit 1; }
 
