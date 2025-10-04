@@ -29,7 +29,9 @@ def cmd_gate(spec):
     csv = spec["data_contract"]["csv_path"]
     feats = ",".join(spec["gates"]["smd_features"])
     try:
-        subprocess.run(["cqo-viz", "gate-report", "--csv", csv, "--features", feats], check=True)
+        subprocess.run(
+            ["cqo-viz", "gate-report", "--csv", csv, "--features", feats], check=True
+        )
     except FileNotFoundError:
         raise SystemExit(
             "cqo-viz が見つかりません。external/cqo-viz を導入し、`pip install -e external/cqo-viz` を実行してください。"
@@ -63,7 +65,9 @@ def cmd_adopt(spec):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--spec", default="docs/requirements/core_spec.yml")
-    ap.add_argument("fn", choices=["validate", "gate", "estimate", "selective", "adopt", "all"])
+    ap.add_argument(
+        "fn", choices=["validate", "gate", "estimate", "selective", "adopt", "all"]
+    )
     args = ap.parse_args()
     spec = load_spec(args.spec)
     if args.fn in ["validate"]:

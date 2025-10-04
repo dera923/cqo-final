@@ -1,0 +1,5 @@
+
+[tool.pytest.ini_options]
+addopts = "-q"
+python_files = ["tests/*.py"]
+plugins = ["tests._plugins.no_skip"]

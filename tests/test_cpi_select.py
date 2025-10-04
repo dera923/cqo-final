@@ -27,4 +27,6 @@ def test_cpi_selection_adopts_max_cpi_with_positive_lcb():
     assert adopted.iloc[0]["lcb95"] > 0, "採択のLCB95は正である必要があります"
 
     # CPI最大
-    assert adopted.iloc[0]["cpi"] == df["cpi"].max(), "採択はCPI最大である必要があります"
+    assert (
+        adopted.iloc[0]["cpi"] == df["cpi"].max()
+    ), "採択はCPI最大である必要があります"

@@ -13,7 +13,9 @@ def rd(p):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument(
-        "--base", required=True, help="baseline tag used in reports/compare/<tag>/baseline"
+        "--base",
+        required=True,
+        help="baseline tag used in reports/compare/<tag>/baseline",
     )
     args = ap.parse_args()
 
@@ -61,10 +63,14 @@ def main():
                 "d_w95": na["w95"] - ba["w95"],
                 "d_w99": na["w99"] - ba["w99"],
                 "adopt_base": (
-                    bool(b_ad.iloc[0]["adopt"]) if (b_ad is not None and not b_ad.empty) else np.nan
+                    bool(b_ad.iloc[0]["adopt"])
+                    if (b_ad is not None and not b_ad.empty)
+                    else np.nan
                 ),
                 "adopt_new": (
-                    bool(n_ad.iloc[0]["adopt"]) if (n_ad is not None and not n_ad.empty) else np.nan
+                    bool(n_ad.iloc[0]["adopt"])
+                    if (n_ad is not None and not n_ad.empty)
+                    else np.nan
                 ),
             }
         ]

@@ -45,7 +45,14 @@ def main() -> int:
     if cand.empty:
         OUT.parent.mkdir(parents=True, exist_ok=True)
         pd.DataFrame(
-            [{"policy": None, "adopted": False, "adopt": False, "reason": "no_candidate_lcb95_le0"}]
+            [
+                {
+                    "policy": None,
+                    "adopted": False,
+                    "adopt": False,
+                    "reason": "no_candidate_lcb95_le0",
+                }
+            ]
         ).to_csv(OUT, index=False)
         print("[adopt] no candidate (LCB95<=0 only) -> adopted=False")
         return 0
@@ -69,7 +76,9 @@ def main() -> int:
     cand[cols + ["adopt"]].to_csv(OUT, index=False)
 
     top = cand.iloc[0][["policy", "cpi", "lcb95"]].to_dict()
-    print(f"[adopt] policy={top['policy']}  cpi={top['cpi']:.6f}  lcb95={top['lcb95']:.6f}")
+    print(
+        f"[adopt] policy={top['policy']}  cpi={top['cpi']:.6f}  lcb95={top['lcb95']:.6f}"
+    )
     return 0
 
 

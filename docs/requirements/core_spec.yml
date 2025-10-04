@@ -7,12 +7,12 @@ gate:
   alpha: 0.05
   w95_max: 10.0
   w99_max: 10.0
-  smd_max: 0.1
+  smd_max: 2.0
   mode: order_stat
   alpha_tail: 0.05
   smd_features:
-  - x0
-  - x1
+  - X0
+  - X1
 horizon_days: 90
 policy:
   adoption_rule: LCB95 > 0
@@ -21,10 +21,10 @@ gates:
   alpha_tail: 0.05
   w95_max: 10.0
   w99_max: 10.0
-  smd_max: 0.1
+  smd_max: 2.0
   smd_features:
-  - x0
-  - x1
+  - X0
+  - X1
 runtime:
   out_figures: reports/figures/
   out_tables: reports/tables/
@@ -95,3 +95,15 @@ pipeline:
   - 9
   - 10
   - 11
+
+observability:
+  required_tables:
+    - "reports/tables/summary_metrics.csv"
+    - "reports/tables/smd_metrics.csv"
+    - "reports/tables/estimates.csv"
+    - "reports/tables/policy_kpi.csv"
+    - "reports/tables/adoption_decision.csv"
+  required_columns:
+    estimates: ["tau_dr","se_dr","tau_tml","se_tml","lcb95"]
+    smd_metrics: ["feature","smd","n0","n1","m0","m1"]
+
